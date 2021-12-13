@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <payment>
+            <paytr_iframe_transfer>
+                <active>1</active>
+                <model>Paytr\Transfer\Model\PaytrPaymentMethodIframe</model>
+                <title>Havale / EFT</title>
+                <order_status>payment_review</order_status>
+                <merchant_id> </merchant_id>
+                <merchant_key> </merchant_key>
+                <merchant_salt> </merchant_salt>
+                <debug_on>1</debug_on>
+                <test_mode>1</test_mode>
+                <paytr_logo>1</paytr_logo>
+                <can_void>1</can_void>
+                <is_gateway>1</is_gateway>
+                <can_refund_partial_per_invoice>1</can_refund_partial_per_invoice>
+                <can_refund>1</can_refund>
+            </paytr_iframe_transfer>
+        </payment>
+    </default>
+</config>
