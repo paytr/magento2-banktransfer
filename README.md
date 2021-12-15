@@ -1,6 +1,7 @@
-# PayTR - Magento 2 Bank Transfer Payment Gateway
+# About PayTR
 PAYTR, is a service which provides the website owners to get secured online payments from the websites in a fast and simple way with the help of PCI-DSS Level 1 Service Provider adapted technical infrastructure and experienced staff and also has the licence of the Central Bank of Turkish Republic. PayTR provides both the store’s payment security and the customer's card security with its PCI-DSS Level 1 Service Provider adapted technical infrastructure by its experienced staff.
 
+## PayTR - Magento 2 Bank Transfer Payment Gateway
 The sellers who use PayTR Bank Transfer payment methods add-on provide the customers to choose PayTR payment method on the checkout page. The sellers who use PayTR payment methods provide to take secured payments from PayTR services. Customers using the PayTR payment method allow them to pay securely through the store's PayTR services. Customers can pay with multiple cards such as American Express, Visa Electron, Visa Debit, MasterCard, MasterCard Debit, etc. The module allows customers to pay with single payment or installment options. After the customer makes the payment, the amount paid is transferred to the seller's PayTR account.
 
 ## Add-on Settings
@@ -17,14 +18,14 @@ Copy MERCHANT ID, MERCHANT KEY and MERCHANT SALT values from PayTR Merchant Pane
 * PayTR service sends a notification regarding that the operation has succeeded to PayTR Bank Transfer add-on and updates the order status.
 
 ## Requirements
-This plugin supports Magento2 version 
+This plugin supports Magento 2 version 
 * 2.3.0 and higher
 * 2.4.0 and higher
 
 ## Installation
 You can install our plugin through Composer:
 ```
-Copy all files to app\code\Paytr\Transfer
+composer require paytr/magento2-banktransfer
 php bin/magento module:enable Paytr_Transfer --clear-static-content
 bin/magento setup:upgrade
 ```
