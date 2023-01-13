@@ -9,6 +9,7 @@ use Magento\Framework\Webapi\Rest\Request;
 use Magento\Sales\Api\Data\TransactionInterface;
 use Magento\Sales\Api\TransactionRepositoryInterface;
 use Magento\Sales\Model\Order;
+use Magento\Sales\Model\Order\Payment\Transaction;
 use Magento\Sales\Model\Order\Payment\Transaction\Builder as TransactionBuilder;
 use Magento\Sales\Model\OrderFactory;
 use Paytr\Transfer\Helper\PaytrHelper;
@@ -25,16 +26,6 @@ class Webhook
     protected Request $request;
     protected PaytrHelper $paytrHelper;
 
-    /**
-     * Webhook constructor.
-     *
-     * @param OrderFactory                   $orderFactory
-     * @param Context                        $context
-     * @param TransactionBuilder             $tb
-     * @param TransactionRepositoryInterface $transactionRepository
-     * @param Request                        $request
-     * @param PaytrHelper                    $paytrHelper
-     */
     public function __construct(
         OrderFactory $orderFactory,
         Context $context,
@@ -51,11 +42,7 @@ class Webhook
         $this->paytrHelper              = $paytrHelper;
     }
 
-    /**
-     * @return string
-     * @throws Exception
-     */
-    public function getResponse(): string
+    public function getResponse()
     {
         $response = $this->responseNormalize($this->request->getBodyParams());
         return array_key_exists('status', $response) && $response['status'] === 'success'
@@ -63,11 +50,7 @@ class Webhook
             : $this->getFailedResponse($response);
     }
 
-    /**
-     * @param  $response
-     * @return string
-     */
-    public function getSuccessResponse($response): string
+    public function getSuccessResponse($response)
     {
         if ($this->validateHash($response, $response['hash'])) {
             $order_id   = $this->normalizeMerchantOid($response['merchant_oid']);
@@ -78,12 +61,7 @@ class Webhook
         }
     }
 
-    /**
-     * @param  $response
-     * @return string
-     * @throws Exception
-     */
-    public function getFailedResponse($response): string
+    public function getFailedResponse($response)
     {
         if ($this->validateHash($response, $response['hash'])) {
             $order_id   = $this->normalizeMerchantOid($response['merchant_oid']);
@@ -99,21 +77,12 @@ class Webhook
         }
     }
 
-    /**
-     * @param  $response
-     * @param  $hash
-     * @return bool
-     */
-    public function validateHash($response, $hash): bool
+    public function validateHash($response, $hash)
     {
-        return base64_encode(hash_hmac('sha256', $response['merchant_oid'].$this->paytrHelper->getMerchantSalt().$response['status'].$response['total_amount'], $this->paytrHelper->getMerchantKey(), true)) === $hash;
+        return base64_encode(hash_hmac('sha256', $response['merchant_oid'] . $this->paytrHelper->getMerchantSalt() . $response['status'] . $response['total_amount'], $this->paytrHelper->getMerchantKey(), true)) === $hash;
     }
 
-    /**
-     * @param  $params
-     * @return array
-     */
-    public function responseNormalize($params): array
+    public function responseNormalize($params)
     {
         $items = [];
         foreach ($params as $key => $param) {
@@ -122,29 +91,28 @@ class Webhook
         return $items;
     }
 
-    /**
-     * @param  $merchant_oid
-     * @return mixed|string
-     */
-    public function normalizeMerchantOid($merchant_oid): string
+    public function normalizeMerchantOid($merchant_oid)
     {
         $merchant_oid = explode('SP', $merchant_oid);
         $merchant_oid = explode('MG', $merchant_oid[1]);
         return $merchant_oid[0];
     }
 
-    /**
-     * @param  $order
-     * @param  $response
-     * @return string
-     */
-    public function addTransactionToOrder($order, $response): string
+    public function addTransactionToOrder($order, $response)
     {
-        if($order->getState())
-        {
+        if ($order->getState()) {
             $payment = $order->getPayment();
             $payment->setTransactionId($response['merchant_oid']);
-            $trn = $payment->addTransaction(TransactionInterface::TYPE_ORDER, null, true);
+            if (in_array($order->getState(), [
+                Order::STATE_HOLDED,
+                Order::STATE_PROCESSING,
+                Order::STATE_CANCELED,
+                Order::STATE_CLOSED,
+                Order::STATE_COMPLETE,
+            ])) {
+                return 'OK';
+            }
+            $trn = $payment->addTransaction(Transaction::TYPE_ORDER, null, true);
             $trn->setIsClosed(1)->save();
             $payment->addTransactionCommentsToOrder(
                 $trn,
@@ -159,24 +127,19 @@ class Webhook
         return 'HATA: Sipariş durumu tamamlanmadı. Tekrar deneniyor.';
     }
 
-    /**
-     * @param  $response
-     * @param  $order
-     * @return string
-     */
-    public function customNote($response, $order): string
+    public function customNote($response, $order)
     {
         $currency               = $this->orderFactory->create()->load($order->getRealOrderId());
         $currency               = $currency->getOrderCurrency()->getId();
-        $maturity_difference    = 'Vade Farkı: '.(round(($response['total_amount'] - $response['payment_amount']) / 100)).' '.$currency.'<br>';
+        $maturity_difference    = 'Vade Farkı: ' . (round(($response['total_amount'] - $response['payment_amount']) / 100)) . ' ' . $currency . '<br>';
         $total_amount           = number_format(($response['total_amount'] / 100), 2, '.', '.');
         $amount                 = number_format(($response['payment_amount'] / 100), 2, '.', '.');
-        $note = '<b>'.__('PAYTR NOTICE - Payment Accepted').'</b><br>';
-        $note .= __('Total Paid').': '.$total_amount.' '.$currency.'<br>';
-        $note .= __('Paid').': '.$amount.' '.$currency.'<br>';
+        $note = '<b>' . __('PAYTR NOTICE - Payment Accepted') . '</b><br>';
+        $note .= __('Total Paid') . ': ' . $total_amount . ' ' . $currency . '<br>';
+        $note .= __('Paid') . ': ' . $amount . ' ' . $currency . '<br>';
         $note .= ($response['installment_count'] === '1' ? '' : $maturity_difference);
-        $note .= __('Installment Count').': '.($response['installment_count'] === '1' ? 'Tek Çekim' : $response['installment_count']).'<br>';
-        $note .= __('PayTR Order Number').': <a href="https://www.paytr.com/magaza/islemler?merchant_oid='.$response['merchant_oid'].'" target="_blank">'.$response['merchant_oid'].'</a><br>';
+        $note .= __('Installment Count') . ': ' . ($response['installment_count'] === '1' ? 'Tek Çekim' : $response['installment_count']) . '<br>';
+        $note .= __('PayTR Order Number') . ': <a href="https://www.paytr.com/magaza/islemler?merchant_oid=' . $response['merchant_oid'] . '" target="_blank">' . $response['merchant_oid'] . '</a><br>';
         return $note;
     }
 }

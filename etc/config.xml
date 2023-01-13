@@ -10,11 +10,12 @@
                 <merchant_id> </merchant_id>
                 <merchant_key> </merchant_key>
                 <merchant_salt> </merchant_salt>
+                <timeout_limit>30</timeout_limit>
                 <debug_on>1</debug_on>
                 <test_mode>1</test_mode>
                 <paytr_logo>1</paytr_logo>
-                <can_void>1</can_void>
-                <is_gateway>1</is_gateway>
+                <is_offline>0</is_offline>
+                <is_gateway>0</is_gateway>
                 <can_refund_partial_per_invoice>1</can_refund_partial_per_invoice>
                 <can_refund>1</can_refund>
             </paytr_iframe_transfer>

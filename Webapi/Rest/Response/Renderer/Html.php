@@ -10,20 +10,13 @@ use Magento\Framework\Webapi\Rest\Response\RendererInterface;
  */
 class Html implements RendererInterface
 {
-    /**
-     * @return string
-     */
+
     public function getMimeType(): string
     {
         return 'text/html';
     }
 
-    /**
-     * @param  array|bool|float|int|object|string|null $data
-     * @return string
-     * @throws Exception
-     */
-    public function render($data): string
+    public function render($data)
     {
         if (is_string($data)) {
             return $data;

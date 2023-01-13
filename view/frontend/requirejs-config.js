@@ -2,13 +2,13 @@ let config = {
     config: {
         mixins: {
             'Magento_Catalog/js/price-box': {
-                'Paytr_Transfer/js/pricebox': true
+                'Paytr_Transfer/js/priceboxBankTransfer': true
             }
         }
     },
     map: {
         '*': {
-            iframeResizer: "Paytr_Transfer/js/iframeResizer.min"
+            iframeResizerBankTransfer: "Paytr_Transfer/js/iframeResizerBankTransfer.min"
         }
     }
 };

@@ -35,14 +35,6 @@ class Redirect extends \Magento\Framework\View\Element\Template
      */
     protected PaytrRequestHelper $paytrRequestHelper;
 
-    /**
-     * Redirect constructor.
-     *
-     * @param Context            $context
-     * @param ManagerInterface   $messageManager
-     * @param PaytrHelper        $paytrHelper
-     * @param PaytrRequestHelper $paytrRequestHelper
-     */
     public function __construct(
         Context $context,
         ManagerInterface $messageManager,
@@ -56,10 +48,7 @@ class Redirect extends \Magento\Framework\View\Element\Template
         parent::__construct($context);
     }
 
-    /**
-     * @return bool
-     */
-    protected function _prepareLayout(): bool
+    protected function _prepareLayout()
     {
         try {
             if (!$this->paytrHelper->getOrder()->getRealOrderId()) {

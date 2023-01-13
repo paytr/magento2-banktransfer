@@ -18,24 +18,10 @@ use Magento\Sales\Model\Order;
 class Index extends \Magento\Framework\App\Action\Action
 {
 
-    /**
-     * @var CheckoutSession
-     */
     private CheckoutSession $checkoutSession;
 
-    /**
-     *
-     * @var SuccessValidator
-     */
     private SuccessValidator $successValidator;
 
-    /**
-     *
-     * @param Context                  $context
-     * @param OrderRepositoryInterface $orderRepository
-     * @param CheckoutSession          $checkoutSession
-     * @param SuccessValidator         $successValidator
-     */
     public function __construct(
         Context $context,
         OrderRepositoryInterface $orderRepository,
@@ -47,11 +33,7 @@ class Index extends \Magento\Framework\App\Action\Action
         $this->successValidator = $successValidator;
     }
 
-    /**
-     * @return Redirect
-     * @throws Exception
-     */
-    public function execute(): Redirect
+    public function execute()
     {
         $order = $this->checkoutSession->getLastRealOrder();
         $order->setState(Order::STATE_PROCESSING)->setStatus(Order::STATE_PROCESSING)->save();

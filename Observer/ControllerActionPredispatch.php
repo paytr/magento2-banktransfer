@@ -36,13 +36,6 @@ class ControllerActionPredispatch implements ObserverInterface
      */
     protected $urlBuilder;
 
-    /**
-     * ControllerActionPredispatch constructor.
-     *
-     * @param Session      $checkoutSession
-     * @param OrderFactory $orderFactory
-     * @param Http         $redirect
-     */
     public function __construct(
         Session $checkoutSession,
         OrderFactory $orderFactory,
@@ -53,11 +46,6 @@ class ControllerActionPredispatch implements ObserverInterface
         $this->_redirect = $redirect;
     }
 
-    /**
-     * @param Observer $observer
-     * @return void
-     * @throws LocalizedException
-     */
     public function execute(Observer $observer)
     {
         $request = $observer->getData('request');

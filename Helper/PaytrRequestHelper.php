@@ -10,34 +10,18 @@ use Magento\Framework\Exception\NoSuchEntityException;
 class PaytrRequestHelper
 {
 
-    /**
-     * @var PaytrHelper
-     */
     protected PaytrHelper $paytrHelper;
-
-    /**
-     * PaytrRequestHelper constructor.
-     *
-     * @param PaytrHelper $paytrHelper
-     */
     public function __construct(PaytrHelper $paytrHelper)
     {
         $this->paytrHelper = $paytrHelper;
     }
 
-    /**
-     * @return string
-     */
     public function getPaytrToken(): string
     {
         return $this->callCurl($this->paytrHelper->makePostVariables());
     }
 
-    /**
-     * @param  $variables
-     * @return mixed|string
-     */
-    private function callCurl($variables): string
+    private function callCurl($variables)
     {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, "https://www.paytr.com/odeme/api/get-token");

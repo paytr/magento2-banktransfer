@@ -37,20 +37,12 @@ class Payment extends Fieldset
         parent::__construct($context, $authSession, $jsHelper, $data);
     }
 
-    /**
-     * @param  AbstractElement $element
-     * @return string
-     */
-    protected function _getFrontendClass($element): string
+    protected function _getFrontendClass($element)
     {
         $enabledString = $this->_isPaymentEnabled($element) ? ' enabled' : 'enabled';
         return parent::_getFrontendClass($element) . ' with-button' . $enabledString;
     }
 
-    /**
-     * @param  $element
-     * @return bool
-     */
     protected function _isPaymentEnabled($element)
     {
         $groupConfig = $element->getGroup();
@@ -66,11 +58,7 @@ class Payment extends Fieldset
         return $isPaymentEnabled;
     }
 
-    /**
-     * @param  AbstractElement $element
-     * @return string
-     */
-    protected function _getHeaderTitleHtml($element): string
+    protected function _getHeaderTitleHtml($element)
     {
         $html = '<div class="config-heading" >';
         $groupConfig = $element->getGroup();
@@ -107,29 +95,17 @@ class Payment extends Fieldset
         return $html;
     }
 
-    /**
-     * @param  AbstractElement $element
-     * @return string
-     */
-    protected function _getHeaderCommentHtml($element): string
+    protected function _getHeaderCommentHtml($element)
     {
         return '';
     }
 
-    /**
-     * @param  AbstractElement $element
-     * @return false
-     */
-    protected function _isCollapseState($element): bool
+    protected function _isCollapseState($element)
     {
         return false;
     }
 
-    /**
-     * @param  AbstractElement $element
-     * @return string
-     */
-    protected function _getExtraJs($element): string
+    protected function _getExtraJs($element)
     {
         $script = "require(['jquery', 'prototype'], function(jQuery){
             window.paytrToggleSolution = function (id, url) {
