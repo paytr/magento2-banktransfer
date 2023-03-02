@@ -65,7 +65,7 @@ class PaytrPaymentMethodIframe extends AbstractMethod
             curl_setopt($ch, CURLOPT_FRESH_CONNECT, true);
             curl_setopt($ch, CURLOPT_TIMEOUT, 90);
             curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 90);
-            $result = @curl_exec($ch);
+            $result = curl_exec($ch);
             curl_close($ch);
             $result = json_decode($result, 1);
             if ($result['status'] !== 'success') {

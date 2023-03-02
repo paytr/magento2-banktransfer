@@ -105,7 +105,7 @@ class PaytrHelper
 
     public function getPaymentAmount()
     {
-        return substr(str_replace('.', '', $this->getOrder()->getBaseGrandTotal()), 0, -2);
+        return substr(str_replace('.', '', $this->getOrder()->getGrandTotal()), 0, -2);
     }
 
     public function getTimeoutLimit()
