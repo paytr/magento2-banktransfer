@@ -130,6 +130,11 @@ class PaytrHelper
         return base64_encode(hash_hmac('sha256', $this->makeHashStr().$this->getMerchantSalt(), $this->getMerchantKey(), true));
     }
 
+    public function getMerchantOkUrl()
+    {
+        return $this->_storeManager->getStore()->getBaseUrl() . "paytr/success";
+    }
+
     public function makePostVariables()
     {
         return array(
@@ -143,6 +148,7 @@ class PaytrHelper
             'debug_on'          =>  $this->getDebugOn(),
             'timeout_limit'     =>  $this->getTimeoutLimit(),
             'test_mode'         =>  $this->getTestMode(),
+            'merchant_ok_url'   =>  $this->getMerchantOkUrl(),
         );
     }
 }
