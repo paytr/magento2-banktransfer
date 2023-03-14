@@ -66,11 +66,14 @@ class Webhook
         if ($this->validateHash($response, $response['hash'])) {
             $order_id   = $this->normalizeMerchantOid($response['merchant_oid']);
             $order      = $this->orderFactory->create()->load($order_id);
-            $order->addStatusHistoryComment($response['failed_reason_msg']);
-            $order->cancel();
-            $order->setState(Order::STATE_CANCELED);
-            $order->setStatus("canceled");
-            $order->save();
+            if($order->getState() == Order::STATE_PENDING_PAYMENT) {
+              $order->addStatusHistoryComment($response['failed_reason_msg']);
+              $order->cancel();
+              $order->setState(Order::STATE_CANCELED);
+              $order->setStatus("canceled");
+              $order->save();
+              return 'OK';
+            }
             return 'OK';
         } else {
             return 'PAYTR notification failed: bad hash';
@@ -101,10 +104,11 @@ class Webhook
     public function addTransactionToOrder($order, $response)
     {
         if ($order->getState()) {
+          if($order->getState() == Order::STATE_PENDING_PAYMENT) {
             $payment = $order->getPayment();
             $payment->setLastTransId($response['merchant_oid']);
             $payment->setTransactionId($response['merchant_oid']);
-            
+
             $transaction = $this->transactionBuilder->setPayment($payment)
             ->setOrder($order)
             ->setTransactionId($response['merchant_oid'])
@@ -123,6 +127,8 @@ class Webhook
             $order->setStatus(Order::STATE_PROCESSING);
             $order->save();
             return 'OK';
+          }
+          return 'OK';
         }
         return 'HATA: Sipariş durumu tamamlanmadı. Tekrar deneniyor.';
     }
