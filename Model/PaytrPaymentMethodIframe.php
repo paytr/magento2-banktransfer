@@ -6,6 +6,8 @@ use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Validator\Exception;
 use Magento\Payment\Model\InfoInterface;
 use Magento\Payment\Model\Method\AbstractMethod;
+use Magento\Sales\Model\Order\Payment\Transaction;
+
 
 /**
  * Class PaytrPaymentMethodIframe
@@ -43,7 +45,7 @@ class PaytrPaymentMethodIframe extends AbstractMethod
 
     public function refund(InfoInterface $payment, $amount)
     {
-        $transactionId = $payment->getParentTransactionId();
+        $transactionId = $payment->getLastTransId();
         $objectManager   = ObjectManager::getInstance();
         $merchant_id = $objectManager->get('Magento\Framework\App\Config\ScopeConfigInterface')
             ->getValue('payment/paytr_iframe_transfer/merchant_id');
@@ -57,11 +59,32 @@ class PaytrPaymentMethodIframe extends AbstractMethod
                 'merchant_oid'  => $transactionId,
                 'return_amount' => $amount,
                 'paytr_token'   => $paytr_token];
+            if($this->callRefundCurl($post_vals) == true) {
+                $refundTransaction = $objectManager->get('Magento\Sales\Model\Order\Payment\Transaction\Builder')
+                    ->setPayment($payment)
+                    ->setOrder($payment->getOrder())
+                    ->setTransactionId($transactionId . '-' . \Magento\Sales\Model\Order\Payment\Transaction::TYPE_REFUND)
+                    ->build(Transaction::TYPE_REFUND);
+                $payment->addTransactionCommentsToOrder(
+                    $refundTransaction,
+                    "<b>PAYTR NOTICE - Refund Complete</b><br/>".$refundTransaction->getId()
+                );
+                return $this;
+            }
+        } catch (Exception $e) {
+            throw new Exception(__('Payment refunding error.'));
+        }
+        return $this;
+    }
+
+    public function callRefundCurl($variables)
+    {
+        try {
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, "https://www.paytr.com/odeme/iade");
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
             curl_setopt($ch, CURLOPT_POST, 1);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $post_vals);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $variables);
             curl_setopt($ch, CURLOPT_FRESH_CONNECT, true);
             curl_setopt($ch, CURLOPT_TIMEOUT, 90);
             curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 90);
@@ -70,17 +93,12 @@ class PaytrPaymentMethodIframe extends AbstractMethod
             $result = json_decode($result, 1);
             if ($result['status'] !== 'success') {
                 throw new Exception($result['err_no'] . " - " . $result['err_msg']);
+            } else {
+                return true;
             }
-            $payment
-                ->setTransactionId($transactionId . '-' . \Magento\Sales\Model\Order\Payment\Transaction::TYPE_REFUND)
-                ->setParentTransactionId($transactionId)
-                ->setIsTransactionClosed(1)
-                ->setShouldCloseParentTransaction(1);
         } catch (Exception $e) {
-            $this->debugData(['transaction_id' => $transactionId, 'exception' => $e->getMessage()]);
-            $this->_logger->error(__('Payment refunding error.'));
             throw new Exception(__('Payment refunding error.'));
         }
-        return $this;
+        return false;
     }
 }
