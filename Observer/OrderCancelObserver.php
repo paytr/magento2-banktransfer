@@ -3,7 +3,7 @@ namespace Paytr\Transfer\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Payment\Model\InfoInterface;
 use Magento\Sales\Api\Data\TransactionSearchResultInterfaceFactory;
-use Paytr\Payment\Model\PaytrPaymentMethodIframe;
+use Paytr\Transfer\Model\PaytrPaymentMethodIframe;
 use Psr\Log\LoggerInterface;
 
 class OrderCancelObserver implements ObserverInterface
