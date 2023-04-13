@@ -60,15 +60,23 @@ class PaytrPaymentMethodIframe extends AbstractMethod
                 'return_amount' => $amount,
                 'paytr_token'   => $paytr_token];
             if($this->callRefundCurl($post_vals) == true) {
+                $payment->setLastTransId($transactionId);
+                $payment->setTransactionId($transactionId);
+                $payment->setParentTransactionId($transactionId);
+                $payment->save();
                 $refundTransaction = $objectManager->get('Magento\Sales\Model\Order\Payment\Transaction\Builder')
                     ->setPayment($payment)
                     ->setOrder($payment->getOrder())
                     ->setTransactionId($transactionId . '-' . \Magento\Sales\Model\Order\Payment\Transaction::TYPE_REFUND)
+                    ->setFailSafe(true)
                     ->build(Transaction::TYPE_REFUND);
+                $refundTransaction->save();
                 $payment->addTransactionCommentsToOrder(
                     $refundTransaction,
-                    "<b>PAYTR NOTICE - Refund Complete</b><br/>".$refundTransaction->getId()
+                    "<b>PAYTR NOTICE - Refund Complete</b><br/>"
                 );
+                $payment->getOrder()->save();
+                $payment->save();
                 return $this;
             }
         } catch (Exception $e) {
