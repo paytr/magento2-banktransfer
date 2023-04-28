@@ -13,8 +13,6 @@ use Magento\Sales\Model\Order\Payment\Transaction;
 use Magento\Sales\Model\Order\Payment\Transaction\Builder as TransactionBuilder;
 use Magento\Sales\Model\OrderFactory;
 use Paytr\Transfer\Helper\PaytrHelper;
-use Psr\Log\LoggerInterface;
-use Magento\Sales\Model\Order\Email\Sender\OrderSender;
 
 
 /**
@@ -28,8 +26,6 @@ class Webhook
     protected TransactionRepositoryInterface $transactionRepository;
     protected Request $request;
     protected PaytrHelper $paytrHelper;
-    private $orderSender;
-    private $logger;
 
     public function __construct(
         OrderFactory $orderFactory,
@@ -38,8 +34,6 @@ class Webhook
         TransactionRepositoryInterface $transactionRepository,
         Request $request,
         PaytrHelper $paytrHelper,
-        OrderSender $orderSender,
-        LoggerInterface $logger,
     ) {
         $this->orderFactory             = $orderFactory;
         $this->config                   = $context->getScopeConfig();
@@ -47,8 +41,6 @@ class Webhook
         $this->transactionRepository    = $transactionRepository;
         $this->request                  = $request;
         $this->paytrHelper              = $paytrHelper;
-        $this->orderSender              = $orderSender;
-        $this->logger                   = $logger;
     }
 
     public function getResponse()
@@ -138,11 +130,6 @@ class Webhook
                 $payment->setParentTransactionId(null);
                 $payment->save();
                 $order->save();
-                try {
-                    $this->orderSender->send($order);
-                } catch (\Throwable $e) {
-                    $this->logger->critical($e);
-                }
                 return 'OK';
             }
             return 'OK';
