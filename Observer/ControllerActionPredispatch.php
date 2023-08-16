@@ -64,6 +64,20 @@ class ControllerActionPredispatch implements ObserverInterface
                 $order = $this->orderFactory->create()->load($orderId);
                 if (($order->getPayment()->getMethodInstance()->getCode()== "paytr_iframe_transfer"
                     ) && $order->getState()== Order::STATE_NEW) {
+                    // refill cart
+                    $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+                    $logger = $objectManager->get('Psr\Log\LoggerInterface');
+                    $cart = $objectManager->get('Magento\Checkout\Model\Cart');
+                    $items = $order->getItemsCollection();
+                    foreach ($items as $item) {
+                        try {
+                            $cart->addOrderItem($item);
+                        } catch (\Exception $e) {
+                            $logger->critical($e);
+                        }
+                    }
+                    $cart->save();
+
                     $this->urlBuilder = \Magento\Framework\App\ObjectManager::getInstance()->get('Magento\Framework\UrlInterface');
                     $url = $this->urlBuilder->getUrl("paytrtransfer/redirect");
                     $this->_redirect->setRedirect($url);
