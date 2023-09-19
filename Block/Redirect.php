@@ -3,11 +3,13 @@
 namespace Paytr\Transfer\Block;
 
 use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\App\Response\Http;
 use Magento\Framework\Message\ManagerInterface;
 use Magento\Framework\View\Element\Template\Context;
 use Magento\Sales\Model\Order;
 use Paytr\Transfer\Helper\PaytrHelper;
 use Paytr\Transfer\Helper\PaytrRequestHelper;
+use Magento\Framework\App\ObjectManager;
 
 /**
  * Class Redirect
@@ -35,14 +37,21 @@ class Redirect extends \Magento\Framework\View\Element\Template
      */
     protected PaytrRequestHelper $paytrRequestHelper;
 
+    /**
+     * @var \Magento\Framework\App\Response\Http
+     */
+    protected Http $_redirect;
+
     public function __construct(
         Context $context,
         ManagerInterface $messageManager,
         PaytrHelper $paytrHelper,
-        PaytrRequestHelper $paytrRequestHelper
+        PaytrRequestHelper $paytrRequestHelper,
+        Http $redirect
     ) {
         $this->config = $context->getScopeConfig();
         $this->_messageManager = $messageManager;
+        $this->_redirect       = $redirect;
         $this->paytrHelper = $paytrHelper;
         $this->paytrRequestHelper = $paytrRequestHelper;
         parent::__construct($context);
@@ -51,9 +60,15 @@ class Redirect extends \Magento\Framework\View\Element\Template
     protected function _prepareLayout()
     {
         try {
-            if (!$this->paytrHelper->getOrder()->getRealOrderId()) {
+            $order = $this->paytrHelper->getOrder();
+            if (!$order->getRealOrderId()) {
                 header('Location: '. $this->_storeManager->getStore()->getBaseUrl());
                 return false;
+            }
+            if($order->getState() == Order::STATE_CANCELED) {
+                $this->urlBuilder = ObjectManager::getInstance()->get('Magento\Framework\UrlInterface');
+                $url = $this->urlBuilder->getUrl("paytrtransfer/error");
+                $this->_redirect->setRedirect($url);
             }
             $paytr_data = [
                 'status' => 'success',
