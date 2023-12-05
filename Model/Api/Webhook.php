@@ -2,7 +2,7 @@
 
 namespace Paytr\Transfer\Model\Api;
 
-use Exception;
+use Magento\Framework\App\ObjectManager;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\View\Element\Template\Context;
 use Magento\Framework\Webapi\Rest\Request;
