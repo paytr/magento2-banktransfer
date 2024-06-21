@@ -36,7 +36,7 @@ class Webhook
         PaytrHelper $paytrHelper
     ) {
         $this->orderFactory             = $orderFactory;
-        $this->config                    = $context->getScopeConfig();
+        $this->config                   = $context->getScopeConfig();
         $this->transactionBuilder       = $tb;
         $this->transactionRepository    = $transactionRepository;
         $this->request                  = $request;
@@ -62,8 +62,15 @@ class Webhook
         }
     }
 
+    /**
+     * @param $response
+     * @return string
+     */
     public function getFailedResponse($response)
     {
+        /**
+         *  Bu alan için güncelleme yapılacak. Asenkron başarısız işlemler kabul ediliyor ve tüm
+         *  koşulları sağlayıyor.
         if ($this->validateHash($response, $response['hash'])) {
             $order_id   = $this->normalizeMerchantOid($response['merchant_oid']);
             $order      = $this->orderFactory->create()->load($order_id);
@@ -85,6 +92,8 @@ class Webhook
         } else {
             return 'PAYTR notification failed: bad hash';
         }
+         */
+        return 'OK';
     }
 
     public function validateHash($response, $hash)
