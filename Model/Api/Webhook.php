@@ -46,7 +46,7 @@ class Webhook
         $response = $this->responseNormalize($this->request->getBodyParams());
         return array_key_exists('status', $response) && $response['status'] === 'success'
             ? $this->getSuccessResponse($response)
-            : 'OK';
+            : $this->returnText('OK');
     }
 
     public function getSuccessResponse($response)
@@ -56,7 +56,7 @@ class Webhook
             $order      = $this->orderFactory->create()->load($order_id);
             return $this->addTransactionToOrder($order, $response);
         } else {
-            return 'PAYTR notification failed: bad hash';
+            return $this->returnText('PAYTR notification failed: bad hash');
         }
     }
 
@@ -108,11 +108,11 @@ class Webhook
                 $payment->setParentTransactionId(null);
                 $payment->save();
                 $order->save();
-                return 'OK';
+                return $this->returnText('OK');
             }
-            return 'OK';
+            return $this->returnText('OK');
         }
-        return 'HATA: Sipariş durumu tamamlanmadı. Tekrar deneniyor.';
+        return $this->returnText('HATA: Sipariş durumu tamamlanmadı. Tekrar deneniyor.');
     }
 
     public function customNote($response, $order)
@@ -129,5 +129,11 @@ class Webhook
         $note .= __('Installment Count') . ': ' . ($response['installment_count'] === '1' ? 'Tek Çekim' : $response['installment_count']) . '<br>';
         $note .= __('PayTR Order Number') . ': <a href="https://www.paytr.com/magaza/islemler?merchant_oid=' . $response['merchant_oid'] . '" target="_blank">' . $response['merchant_oid'] . '</a><br>';
         return $note;
+    }
+
+    public function returnText($text)
+    {
+        echo $text;
+        die();
     }
 }
