@@ -51,7 +51,10 @@ class Webhook
         $this->logger                   = $logger;
     }
 
-    public function getResponse()
+    /**
+     * @return string
+     */
+    public function getResponse(): string
     {
         $response = $this->responseNormalize($this->request->getBodyParams());
         return array_key_exists('status', $response) && $response['status'] === 'success'
@@ -59,6 +62,10 @@ class Webhook
             : $this->getFailedResponse($response);
     }
 
+    /**
+     * @param $response
+     * @return string
+     */
     public function getSuccessResponse($response)
     {
         if ($this->validateHash($response, $response['hash'])) {
@@ -70,6 +77,10 @@ class Webhook
         }
     }
 
+    /**
+     * @param $response
+     * @return string
+     */
     public function getFailedResponse($response)
     {
         if ($this->validateHash($response, $response['hash'])) {
@@ -90,11 +101,20 @@ class Webhook
         }
     }
 
-    public function validateHash($response, $hash)
+    /**
+     * @param $response
+     * @param $hash
+     * @return bool
+     */
+    public function validateHash($response, $hash): bool
     {
         return base64_encode(hash_hmac('sha256', $response['merchant_oid'] . $this->paytrHelper->getMerchantSalt() . $response['status'] . $response['total_amount'], $this->paytrHelper->getMerchantKey(), true)) === $hash;
     }
 
+    /**
+     * @param $params
+     * @return array
+     */
     public function responseNormalize($params)
     {
         $items = [];
@@ -104,6 +124,10 @@ class Webhook
         return $items;
     }
 
+    /**
+     * @param $merchant_oid
+     * @return mixed
+     */
     public function normalizeMerchantOid($merchant_oid)
     {
         $merchant_oid = explode('SP', $merchant_oid);
@@ -111,6 +135,11 @@ class Webhook
         return $merchant_oid[0];
     }
 
+    /**
+     * @param $order
+     * @param $response
+     * @return string
+     */
     public function addTransactionToOrder($order, $response)
     {
         if ($order->getState()) {
@@ -150,6 +179,11 @@ class Webhook
         return 'HATA: Sipariş durumu tamamlanmadı. Tekrar deneniyor.';
     }
 
+    /**
+     * @param $response
+     * @param $order
+     * @return string
+     */
     public function customNote($response, $order)
     {
         $currency               = $this->orderFactory->create()->load($order->getRealOrderId());
