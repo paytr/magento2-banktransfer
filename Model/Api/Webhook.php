@@ -15,8 +15,11 @@ use Magento\Sales\Model\OrderFactory;
 use Paytr\Transfer\Helper\PaytrHelper;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
 use Psr\Log\LoggerInterface;
-use Magento\Framework\App\Response\Http as HttpResponse;
 
+
+/**
+ * Class Webhook
+ */
 class Webhook
 {
     protected OrderFactory $orderFactory;
@@ -25,10 +28,8 @@ class Webhook
     protected TransactionRepositoryInterface $transactionRepository;
     protected Request $request;
     protected PaytrHelper $paytrHelper;
-    private OrderSender $orderSender;
-    private LoggerInterface $logger;
-    private HttpResponse $httpResponse;
-    private string $responseText = '';
+    private $orderSender;
+    private $logger;
 
     public function __construct(
         OrderFactory $orderFactory,
@@ -38,46 +39,27 @@ class Webhook
         Request $request,
         PaytrHelper $paytrHelper,
         OrderSender $orderSender,
-        LoggerInterface $logger,
-        HttpResponse $httpResponse
+        LoggerInterface $logger
     ) {
         $this->orderFactory             = $orderFactory;
-        $this->config                   = $context->getScopeConfig();
+        $this->config                    = $context->getScopeConfig();
         $this->transactionBuilder       = $tb;
         $this->transactionRepository    = $transactionRepository;
         $this->request                  = $request;
         $this->paytrHelper              = $paytrHelper;
         $this->orderSender              = $orderSender;
         $this->logger                   = $logger;
-        $this->httpResponse             = $httpResponse;
     }
 
-    /**
-     * Returns webhook response
-     *
-     * @return void
-     */
-    public function getResponse(): void
+    public function getResponse()
     {
         $response = $this->responseNormalize($this->request->getBodyParams());
-
-        $resultText = (array_key_exists('status', $response) && $response['status'] === 'success')
+        return array_key_exists('status', $response) && $response['status'] === 'success'
             ? $this->getSuccessResponse($response)
             : $this->getFailedResponse($response);
-
-        $this->httpResponse->setHeader('Content-Type', 'text/plain', true);
-        $this->httpResponse->setBody($resultText);
-
-        $this->httpResponse->sendResponse();
-        @exit;
     }
 
-    /**
-     * Returns webhook response
-     *
-     * @return string
-     */
-    public function getSuccessResponse($response): string
+    public function getSuccessResponse($response)
     {
         if ($this->validateHash($response, $response['hash'])) {
             $order_id   = $this->normalizeMerchantOid($response['merchant_oid']);
@@ -88,12 +70,7 @@ class Webhook
         }
     }
 
-    /**
-     * Returns webhook response
-     *
-     * @return string
-     */
-    public function getFailedResponse($response): string
+    public function getFailedResponse($response)
     {
         if ($this->validateHash($response, $response['hash'])) {
             $order_id   = $this->normalizeMerchantOid($response['merchant_oid']);
@@ -113,22 +90,12 @@ class Webhook
         }
     }
 
-    /**
-     * Returns webhook response
-     *
-     * @return bool
-     */
-    public function validateHash($response, $hash): bool
+    public function validateHash($response, $hash)
     {
         return base64_encode(hash_hmac('sha256', $response['merchant_oid'] . $this->paytrHelper->getMerchantSalt() . $response['status'] . $response['total_amount'], $this->paytrHelper->getMerchantKey(), true)) === $hash;
     }
 
-    /**
-     * Returns webhook response
-     *
-     * @return array
-     */
-    public function responseNormalize($params): array
+    public function responseNormalize($params)
     {
         $items = [];
         foreach ($params as $key => $param) {
@@ -137,11 +104,6 @@ class Webhook
         return $items;
     }
 
-    /**
-     * Returns webhook response
-     *
-     * @return mixed
-     */
     public function normalizeMerchantOid($merchant_oid)
     {
         $merchant_oid = explode('SP', $merchant_oid);
@@ -149,11 +111,6 @@ class Webhook
         return $merchant_oid[0];
     }
 
-    /**
-     * Returns webhook response
-     *
-     * @return mixed
-     */
     public function addTransactionToOrder($order, $response)
     {
         if ($order->getState()) {
@@ -193,11 +150,6 @@ class Webhook
         return 'HATA: Sipariş durumu tamamlanmadı. Tekrar deneniyor.';
     }
 
-    /**
-     * Returns webhook response
-     *
-     * @return mixed
-     */
     public function customNote($response, $order)
     {
         $currency               = $this->orderFactory->create()->load($order->getRealOrderId());
