@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
-    <preference for="Paytr\Payment\Api\WebhookInterface" type="Paytr\Payment\Model\Api\Webhook"/>
+    <preference for="Paytr\Transfer\Api\WebhookInterface" type="Paytr\Transfer\Model\Api\Webhook"/>
     <type name="Magento\Framework\Webapi\Rest\Request\DeserializerFactory">
         <arguments>
             <argument name="deserializers" xsi:type="array">
                 <item name="application_x_www_form_urlencoded" xsi:type="array">
                     <item name="type" xsi:type="string">application/x-www-form-urlencoded</item>
-                    <item name="model" xsi:type="string">Paytr\Payment\Webapi\Rest\Request\Deserializer\XWwwFormUrlencoded</item>
+                    <item name="model" xsi:type="string">Paytr\Transfer\Webapi\Rest\Request\Deserializer\XWwwFormUrlencoded</item>
                 </item>
                 <item name="application_json" xsi:type="array">
                     <item name="type" xsi:type="string">application/json</item>
@@ -29,22 +29,22 @@
     </type>
     <type name="Magento\Framework\Webapi\Rest\Request">
         <plugin name="force_html_response"
-                type="Paytr\Payment\Plugin\Magento\Framework\Webapi\Rest\Request"/>
+                type="Paytr\Transfer\Plugin\Magento\Framework\Webapi\Rest\Request"/>
     </type>
     <type name="Magento\Framework\Webapi\Rest\Response\RendererFactory">
         <arguments>
             <argument name="renders" xsi:type="array">
                 <item name="html" xsi:type="array">
                     <item name="type" xsi:type="string">text/html</item>
-                    <item name="model" xsi:type="string">Paytr\Payment\Webapi\Rest\Response\Renderer\Html</item>
+                    <item name="model" xsi:type="string">Paytr\Transfer\Webapi\Rest\Response\Renderer\Html</item>
                 </item>
                 <item name="default" xsi:type="array">
                     <item name="type" xsi:type="string">*/*</item>
-                    <item name="model" xsi:type="string">Paytr\Payment\Webapi\Rest\Response\Renderer\All</item>
+                    <item name="model" xsi:type="string">Paytr\Transfer\Webapi\Rest\Response\Renderer\All</item>
                 </item>
-                <item name="html" xsi:type="array">
-                    <item name="type" xsi:type="string">text/plain</item>
-                    <item name="model" xsi:type="string">Paytr\Payment\Webapi\Rest\Response\Renderer\All</item>
+                <item name="default" xsi:type="array">
+                    <item name="type" xsi:type="string">*/*</item>
+                    <item name="model" xsi:type="string">Paytr\Transfer\Webapi\Rest\Response\Renderer\All</item>
                 </item>
             </argument>
         </arguments>
