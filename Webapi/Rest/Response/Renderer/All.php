@@ -1,6 +1,6 @@
 <?php
 
-namespace Paytr\Payment\Webapi\Rest\Response\Renderer;
+namespace Paytr\Transfer\Webapi\Rest\Response\Renderer;
 
 use Magento\Framework\Webapi\Exception;
 use Magento\Framework\Webapi\Rest\Response\RendererInterface;
