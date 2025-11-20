@@ -42,7 +42,7 @@ class Webhook
         LoggerInterface $logger
     ) {
         $this->orderFactory             = $orderFactory;
-        $this->config                    = $context->getScopeConfig();
+        $this->config                   = $context->getScopeConfig();
         $this->transactionBuilder       = $tb;
         $this->transactionRepository    = $transactionRepository;
         $this->request                  = $request;
@@ -57,9 +57,10 @@ class Webhook
     public function getResponse(): string
     {
         $response = $this->responseNormalize($this->request->getBodyParams());
-        return array_key_exists('status', $response) && $response['status'] === 'success'
+        $result = array_key_exists('status', $response) && $response['status'] === 'success'
             ? $this->getSuccessResponse($response)
             : $this->getFailedResponse($response);
+        return 'RESTPTR-' . $result;
     }
 
     /**
