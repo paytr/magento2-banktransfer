@@ -1,7 +1,7 @@
 {
     "name": "paytr/magento2-banktransfer",
     "description": "PayTR Magento2 Bank Transfer Payment Module",
-    "version": "1.2.2",
+    "version": "1.2.3",
     "type": "magento2-module",
     "require": {
         "php": "^8.1"
